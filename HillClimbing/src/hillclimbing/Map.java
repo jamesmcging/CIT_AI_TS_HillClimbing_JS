@@ -30,24 +30,25 @@ public class Map {
     // Object used to read a line from the file object
     BufferedReader bufferedReader = new BufferedReader(fileReader);
     // Each line in the file is a string. We store it in a list of strings.
-    List<String> lines = new ArrayList<String>();
+    List<String> distancesFromACity = new ArrayList<String>();
     // Each line is set to null
     String line = null;
     // While the file still has lines to read...
     while ((line = bufferedReader.readLine()) != null) {
       // ...add the current line to the list lines
-      lines.add(line);
+      distancesFromACity.add(line);
     }
     // We're now finished with the  line reader
     bufferedReader.close();
+    
     // Convert our list into an array
-    String[] arrCityDistances = lines.toArray(new String[lines.size()]);
+    String[] arrCityDistances = distancesFromACity.toArray(new String[distancesFromACity.size()]);
     
     // For each line in arrCityDistances we...
-    for (int i = 0; i < arrCityDistances.length; i++) {
+    for (int i = 0; i < distancesFromACity.size(); i++) {
       
       // ... explode the line on space into an array of strings called distances
-      String[] arrDistances = arrCityDistances[i].split(" ");
+      String[] arrDistances = distancesFromACity.get(i).split(" ");
       
       // We then generate the two dimensional array that holds the distances 
       // from each city to the next city
@@ -58,11 +59,7 @@ public class Map {
     }
   }
   
-  public void printMap() {
-    for (int i = 0; i < arrMap.length; i++) {
-      for (int j = 0; j < arrMap[i].length; j++) {
-        System.out.println(arrMap[i][j]);
-      }
-    }
+  public int getDistance(int nFromCityID, int nToCityID) {
+    return arrMap[nFromCityID][nToCityID];
   }
 }
