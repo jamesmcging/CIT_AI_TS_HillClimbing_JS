@@ -14,8 +14,8 @@ import java.util.ArrayList;
  */
 public class HillClimbing {
 
-  static int nChildStates = 10;
-  static int nRunTimes = 100;
+  static int nChildStates = 100;
+  static int nRunTimes = 1000;
   
   /**
    * @param args the command line arguments
@@ -33,6 +33,7 @@ public class HillClimbing {
     // want in the class static nChildStats.
     Route[] arrChildRoutes = new Route[nChildStates];
     
+    // Keep the shortest route found to measure new child routes against
     Route shortestRouteFound = null;
         
     // Run the algorithm a couple of times
@@ -44,8 +45,11 @@ public class HillClimbing {
       // Generate a starting position
       Route currentBestRoute = routeGenerator.getRandomRoute();
       
-      // Add the starting position to the log
-      log.addRoute(currentBestRoute);
+      // Keep track of the number of child states we pass through
+      int nChildGeneration = 0;
+      
+      // Add the starting route/ state to the log
+      log.addRoute(nChildGeneration, currentBestRoute);
 
       // If we haven't got a shortestRouteFound (first time through) then this
       // becomes shortestRouteFound
@@ -57,6 +61,7 @@ public class HillClimbing {
       boolean bFoundShorterChildNode = true;
       while (bFoundShorterChildNode) {
         bFoundShorterChildNode = false;
+        nChildGeneration++;
 
         // Generate child nodes using the the current best node as a starting 
         // position.
@@ -69,13 +74,14 @@ public class HillClimbing {
           if (arrChildRoutes[i].getRouteLength() < currentBestRoute.getRouteLength()) {
             // Record the shortest route found so far
             currentBestRoute = arrChildRoutes[i];
-            
-            // Add this child route to the arrRunLog
-            log.addRoute(currentBestRoute);
-            
             // Tell the algorithm to try again
             bFoundShorterChildNode = true;
           }
+        }
+        
+        // Save the shortest child route found to the log
+        if (bFoundShorterChildNode) {
+          log.addRoute(nChildGeneration, currentBestRoute);
         }
       }      
     }

@@ -36,6 +36,14 @@ class Log {
   // Keep all other routes in an arrayList
   ArrayList<RunRecord> log = new ArrayList();
   
+  // Create an array to hold the distance covered in each child generation, this
+  // will be divided by arrGenerationCount to get an average of each generation.
+  int[] arrTotalDistanceInAGeneration = new int[500];
+  // Counter that keep track of the number of times a generation has happened, 
+  // this is used with arrTotalDistanceInAGeneration to calculate an average
+  // distance for each generation in a particular StateGenerator.
+  int[] arrGenerationCount = new int[500];
+  
   public Log(String sAlgorithmName, int nRunTimes, int nChildStates, String sCityMap) {
     this.sAlgorithmName = sAlgorithmName;
     this.nRunTimes = nRunTimes;
@@ -48,9 +56,16 @@ class Log {
     log.add(new RunRecord(nRunCount));
   }
 
-  void addRoute(Route route) {
+  void addRoute(int nChildGeneration, Route route) {
+    // Add the route to the runRecord
     RunRecord runRecord = log.get(nCurrentRoute);   
     runRecord.addRouteToRecord(route);
+    
+    // Increment the generation counter
+    arrGenerationCount[nChildGeneration]++;
+    
+    // Increment the total distance covered by this generation
+    arrTotalDistanceInAGeneration[nChildGeneration] += route.getRouteLength();
   }
   
   public int getNumberOfRuns() {
@@ -121,16 +136,19 @@ class Log {
   }
   
   void printLogToFile() throws IOException {
-    String sFileName = "C:\\Users\\James\\Documents\\Masters\\AI\\Assignment1\\log\\" + this.sAlgorithmName + ".txt";
+    String sFileName = "C:\\Users\\James\\Documents\\Masters\\AI\\Assignment1\\log\\" + this.sAlgorithmName + "_ChildStatesX" + this.nChildStates + ".txt";
     System.out.println("Outputting the results to " + sFileName);
     
     WriteFile writeFile = new WriteFile(sFileName);
     writeFile.WriteToFile("Algorithm: " + this.sAlgorithmName);
     writeFile.WriteToFile("City map: " + this.sCityMap);
-    writeFile.WriteToFile("Number of iterations this algorithm was run: " + this.nRunTimes);
+    writeFile.WriteToFile("Number of times this algorithm was run: " + this.nRunTimes);
+    writeFile.WriteToFile("Number of child states per generation: " + this.nChildStates);
     writeFile.WriteToFile("Shortest route found was " + getShortestRoute().getRouteLength() + " units long.");
-    writeFile.WriteToFile("Shortest route was: " + getIterationCountOfShortestRoute() + " iterations long");   
+    writeFile.WriteToFile("Shortest route took " + getIterationCountOfShortestRoute() + " generations to find");   
+    writeFile.WriteToFile("Shortest route:");
     writeFile.WriteToFile(getShortestRoute().printRoute());
+    writeFile.WriteToFile("Average distance by generation:");
     writeFile.WriteToFile("--------------------------------------------------");
     
     ArrayList<String> arrAverageRunTimes = this.getAverageRunTimes();
@@ -149,40 +167,16 @@ class Log {
    * @return 
    */
   private ArrayList<String> getAverageRunTimes() {
-    ArrayList<String> arrAverageRunTimes = new ArrayList();
-    // This array list will hold the number of times a particularl iteration occurred
-    ArrayList<Integer> arrIterationCount = new ArrayList();
-    // This array list will hold the distances reached on this iteration
-    ArrayList<Integer> arrDistance = new ArrayList();
+    ArrayList<String> arrAverageRoute = new ArrayList();
     
-    // Iterate over all the result sets
-    for (int i = 0; i < log.size(); i++) {
-      RunRecord runRecord = log.get(i);
-
-      // Iterate over the routes in this result set to get the total distances
-      // and number of times reached so that we can work out some averages
-      for (int j = 0; j < runRecord.arrRunRecord.size(); j++) {
-        // Increment the counter of the number of times this child state has been 
-        // reached.
-        int nCurrentCount = arrIterationCount.get(j);
-        arrIterationCount.add(j, (nCurrentCount + 1));
-        
-        // Add the distance reached on this route to the total in arrDistance
-        int nCurrentDistanceTotal = arrDistance.get(j);
-        arrDistance.add(j, (nCurrentDistanceTotal + runRecord.arrRunRecord.get(j).getRouteLength()));
+    for (int i = 0; i < arrGenerationCount.length; i++) {
+      if (arrGenerationCount[i] > 0) {
+        // At the level we're dealing with, the precision that a float will give
+        // us isn't relevant.
+        int nAverageDistanceForThisGeneration = (arrTotalDistanceInAGeneration[i] / arrGenerationCount[i]);
+        arrAverageRoute.add(i, nAverageDistanceForThisGeneration +  "," + arrGenerationCount[i] );
       }
-    }
-    
-    for (int i = 0; i < arrIterationCount.size(); i++) {
-      System.out.println("Iteration " + i + " : " + arrIterationCount.get(i));
-    }
-    
-    // Now calculate the averages for each iteration
-    for (int i = 0; i < arrIterationCount.size(); i++) {
-      String sString = i + " " + (arrIterationCount.get(i) + " " + (arrDistance.get(i) / arrIterationCount.get(i)));
-      arrAverageRunTimes.add(i, sString);
-    }
-    
-    return arrAverageRunTimes;
+    }  
+    return arrAverageRoute;
   }
 }
