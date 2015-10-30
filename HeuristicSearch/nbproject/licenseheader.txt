@@ -1,0 +1,11 @@
+<#if licenseFirst??>
+${licenseFirst}
+</#if>
+${licensePrefix}Cork Institute of Technology
+${licensePrefix}Masters in Software Engineering
+${licensePrefix}Artificial Intelligence
+${licensePrefix}Assignment 1 - Heuristic Search Algorithms
+${licensePrefix}Random Restart HillClimbing
+<#if licenseLast??>
+${licenseLast}
+</#if>
